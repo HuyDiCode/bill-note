@@ -1,6 +1,0 @@
----
-description: Description when doing things with supabase
-globs: 
-alwaysApply: true
----
-- I don't have supabase local so don't run any command to do it
