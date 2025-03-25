@@ -145,3 +145,19 @@
   - Bug fixes that don't affect user setup
   - Internal refactoring
   - Developer-facing changes
+
+## Version Control Exclusions
+
+- Never push the following to the repository:
+
+  - `memory-bank/` directory and its contents
+  - `.cursorrules` file
+  - Any other Cursor-specific files or metadata
+  - `.cursor/` directory (if exists)
+  - Local environment files (`.env.local`, `.env.development.local`, etc.)
+  - Node modules and build artifacts
+
+- Ensure these are properly added to `.gitignore`
+- If accidentally staged, remove with `git reset HEAD <file>` before committing
+- If accidentally committed but not pushed, use `git reset --soft HEAD~1` to undo
+- If accidentally pushed, create a new commit that removes these files and update `.gitignore`

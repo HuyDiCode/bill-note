@@ -31,9 +31,15 @@ We're currently focused on:
    - Implemented error message system with i18n support
 
 4. Enhanced API route error handling
+
    - Improved error responses with consistent formats
    - Added checks for table existence before queries
    - Implemented proper error status codes
+
+5. Established development guidelines:
+   - Added commit message standards using Conventional Commits format
+   - Created README modification policy
+   - Added version control exclusions for Cursor-related files
 
 ## Git Workflow and Commit Standards
 
@@ -93,6 +99,23 @@ The README file should only be updated when:
 - Changes that users don't need to be aware of
 
 README is primarily for end users to understand the project, its features, and how to get started. Keep changes to this file purposeful and necessary.
+
+### Version Control Exclusions
+
+Never commit or push the following to the repository:
+
+- `memory-bank/` directory and its contents
+- `.cursorrules` file
+- Any other Cursor-specific files
+- `.cursor/` directory (if exists)
+- Local environment files (`.env.local`, etc.)
+
+These files are specific to individual development setups and should not be shared. If accidentally committed:
+
+1. If not pushed yet: `git reset --soft HEAD~1` to undo the commit
+2. If already pushed: Create a new commit removing these files and update `.gitignore`
+
+Always ensure these files are properly included in `.gitignore` to prevent accidental commits.
 
 ## Next Steps
 
