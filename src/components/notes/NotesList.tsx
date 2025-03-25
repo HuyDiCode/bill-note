@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { toast } from "../../hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ const CATEGORIES = [
 
 export default function NotesList() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -85,26 +87,28 @@ export default function NotesList() {
 
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Failed to fetch notes");
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || t("errors.NOTE_NOT_FOUND"));
       }
 
       const data = await response.json();
 
       if (reset) {
-        setNotes(data.notes);
+        setNotes(data.notes || []);
       } else {
-        setNotes((prev) => [...prev, ...data.notes]);
+        setNotes((prev) => [...prev, ...(data.notes || [])]);
       }
 
-      setHasMore(data.notes.length === PAGE_SIZE);
+      setHasMore(data.notes && data.notes.length === PAGE_SIZE);
       setPage(pageToFetch + 1);
     } catch (error) {
       console.error("Error fetching notes:", error);
       toast({
-        title: "Lỗi",
-        description: "Không thể tải danh sách ghi chú.",
+        title: t("errors.NOTE_NOT_FOUND"),
+        description: error instanceof Error ? error.message : String(error),
         variant: "destructive",
       });
+      setNotes([]);
     } finally {
       setIsLoading(false);
     }
@@ -137,10 +141,10 @@ export default function NotesList() {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Danh sách ghi chú</h1>
+        <h1 className="text-2xl font-bold">{t("notes.title")}</h1>
         <Button onClick={handleCreateNote}>
           <Plus className="mr-2 h-4 w-4" />
-          Tạo ghi chú mới
+          {t("notes.newNote")}
         </Button>
       </div>
 
@@ -148,7 +152,7 @@ export default function NotesList() {
         <div className="flex-1 relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Tìm kiếm ghi chú..."
+            placeholder={t("common.search")}
             className="pl-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -156,7 +160,7 @@ export default function NotesList() {
         </div>
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue placeholder="Chọn danh mục" />
+            <SelectValue placeholder={t("notes.selectCategory")} />
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((cat) => (
@@ -190,13 +194,11 @@ export default function NotesList() {
       ) : notes.length === 0 ? (
         <div className="text-center py-12 border rounded-lg">
           <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">Chưa có ghi chú nào</h3>
-          <p className="text-muted-foreground mb-6">
-            Bắt đầu bằng cách tạo ghi chú đầu tiên của bạn
-          </p>
+          <h3 className="text-lg font-medium mb-2">{t("notes.noItems")}</h3>
+          <p className="text-muted-foreground mb-6">{t("common.noData")}</p>
           <Button onClick={handleCreateNote}>
             <Plus className="mr-2 h-4 w-4" />
-            Tạo ghi chú mới
+            {t("notes.newNote")}
           </Button>
         </div>
       ) : (
@@ -211,7 +213,9 @@ export default function NotesList() {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="line-clamp-1">{note.title}</CardTitle>
-                    <Badge variant="outline">{note.category}</Badge>
+                    <Badge variant="outline">
+                      {note.category || t("notes.category")}
+                    </Badge>
                   </div>
                   <CardDescription>
                     {format(new Date(note.date), "dd/MM/yyyy")}
@@ -249,7 +253,7 @@ export default function NotesList() {
                 onClick={() => fetchNotes()}
                 className="w-full max-w-xs"
               >
-                Tải thêm
+                {t("common.more")}
               </Button>
             </div>
           )}

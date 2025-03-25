@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { createErrorResponse } from "@/utils/i18n";
+import { NOTE_ERRORS, AUTH_ERRORS } from "@/constants/errors";
 
 // GET: Lấy danh sách notes
 export async function GET(request: Request) {
@@ -11,27 +13,50 @@ export async function GET(request: Request) {
   const dateFrom = searchParams.get("dateFrom") || null;
   const dateTo = searchParams.get("dateTo") || null;
 
-  const supabase = await createClient();
-
-  // Kiểm tra xác thực người dùng
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const supabase = await createClient();
+
+    // Kiểm tra xác thực người dùng
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(createErrorResponse(AUTH_ERRORS.UNAUTHORIZED), {
+        status: 401,
+      });
+    }
+
+    // Kiểm tra xem bảng notes có tồn tại không
+    const { error: tableCheckError } = await supabase
+      .from("notes")
+      .select("id")
+      .limit(1);
+
+    // Nếu có lỗi liên quan đến bảng không tồn tại hoặc không có quyền truy cập
+    if (tableCheckError) {
+      console.error("Table check error:", tableCheckError);
+
+      // Trả về một mảng trống thay vì lỗi
+      return NextResponse.json({
+        notes: [],
+        total: 0,
+        page,
+        pageSize,
+      });
+    }
+
     const start = (page - 1) * pageSize;
     const end = start + pageSize - 1;
 
     // Xây dựng query
-    let query = supabase
-      .from("notes")
-      .select("*", { count: "exact" })
-      .eq("added_by", user.id)
-      .order("date", { ascending: false });
+    let query = supabase.from("notes").select("*", { count: "exact" });
+
+    // Chỉ lấy các notes của người dùng hiện tại
+    query = query.eq("added_by", user.id);
+
+    // Sắp xếp theo ngày giảm dần (mới nhất trước)
+    query = query.order("date", { ascending: false });
 
     // Áp dụng các bộ lọc nếu có
     if (category) {
@@ -39,7 +64,7 @@ export async function GET(request: Request) {
     }
 
     if (search) {
-      query = query.or(`title.ilike.%${search}%,notes.ilike.%${search}%`);
+      query = query.or(`title.ilike.%${search}%,store_name.ilike.%${search}%`);
     }
 
     if (dateFrom) {
@@ -56,38 +81,40 @@ export async function GET(request: Request) {
     const { data: notes, count, error } = await query;
 
     if (error) {
+      console.error("Query error:", error);
       throw error;
     }
 
     return NextResponse.json({
-      notes,
+      notes: notes || [],
       total: count || 0,
       page,
       pageSize,
     });
   } catch (error) {
     console.error("Error fetching notes:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch notes" },
-      { status: 500 }
-    );
+    return NextResponse.json(createErrorResponse(NOTE_ERRORS.NOT_FOUND), {
+      status: 500,
+    });
   }
 }
 
 // POST: Tạo note mới
 export async function POST(request: Request) {
-  const supabase = await createClient();
-
-  // Kiểm tra xác thực người dùng
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const supabase = await createClient();
+
+    // Kiểm tra xác thực người dùng
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(createErrorResponse(AUTH_ERRORS.UNAUTHORIZED), {
+        status: 401,
+      });
+    }
+
     const body = await request.json();
 
     // Tạo note mới
@@ -105,15 +132,15 @@ export async function POST(request: Request) {
       .select();
 
     if (error) {
+      console.error("Create note error:", error);
       throw error;
     }
 
     return NextResponse.json(data[0]);
   } catch (error) {
     console.error("Error creating note:", error);
-    return NextResponse.json(
-      { error: "Failed to create note" },
-      { status: 500 }
-    );
+    return NextResponse.json(createErrorResponse(NOTE_ERRORS.CREATION_FAILED), {
+      status: 500,
+    });
   }
 }

@@ -42,3 +42,8 @@ next-env.d.ts
 
 # Supabase
 .supabase
+
+# Cursor-related files and directories
+/.cursor/
+/.cursorrules
+/memory-bank/
