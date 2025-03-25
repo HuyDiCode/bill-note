@@ -1,0 +1,10 @@
+---
+description: Description of tasks of UI/UX
+globs: 
+alwaysApply: true
+---
+- Use shadcn for most case
+- When you need to install a component from shadcn, use this example of command: 
+```npx shadcn@latest add accordion```
+
+

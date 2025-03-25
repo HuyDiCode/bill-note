@@ -1,0 +1,36 @@
+---
+description: Đây là cách để mà có thể tạo ra một page mới
+globs: 
+alwaysApply: true
+---
+- Đầu tiên cấu trúc dự án sẽ gồm 2 folder (auth) và (root), auth sẽ cho những cái liên quan đến xác thực login logout, còn root là sẽ gồm toàn bộ các trang còn lại, khi tạo một trang mới hãy tạo một thư mục có tên của trang đó nằm trong root sau đó tạo file page.tsx sẽ có dạng như sau
+```tsx
+"use client";
+
+import dynamic from "next/dynamic";
+import { PageSkeleton } from "@/components/ui/skeleton";
+
+// Lazy load Dashboard component
+const Dashboard = dynamic(() => import("@/page/dashboard"), {
+  loading: () => <PageSkeleton />,
+  ssr: false, // Vì component này có thể yêu cầu quyền truy cập vào DOM
+});
+
+export default function Page() {
+  return <Dashboard />;
+}
+```
+
+- Sau đó tạo một folder có tên của trang đó nằm trong thư mục page rồi tạo UI ở đó, và để tạo component thuộc trang đó thì chỉ cần tạo folder có tên của trang nằm trong thư mục component rồi tạo component ở đó.
+
+- Hãy tận dụng các utils, libs, components có sẵn như hàm format trong utils, createClient cho supabase, các components của shadcn
+
+- khi tạo một trang có chứa bảng hãy dùng component data-table đã được thiết kế từ trước, tạo một file columns.tsx chứa định nghĩa các cột của bảng trong folder nằm trong component của trang đó rồi kết hợp lại.
+
+-hãy tận dụng khả năng của mcp
+
+- đừng nhồi nhét mọi thứ quá nhiều vào một trang mà hãy tách ra thành component nhỏ
+
+- hãy sử dụng thêm tanstack query
+
+- nên dùng Skeleton để cho trạng thái loading

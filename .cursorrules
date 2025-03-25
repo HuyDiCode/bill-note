@@ -1,0 +1,102 @@
+# Bill Note Cursor Rules
+
+## Project Structure
+
+- The application uses Next.js with App Router
+- Authentication routes are in `/app/(auth)`
+- Application routes are in `/app/(root)`
+- TypeScript is used for all code
+- Use `"use client"` directive for client components
+
+## TypeScript Types
+
+- Import types from the central `/src/types` directory
+- Use interfaces for complex objects
+- Use enums for predefined values
+- Follow naming conventions:
+  - PascalCase for interfaces, types, and enums
+  - camelCase for variables, functions, and properties
+
+## Component Structure
+
+- Create components in `/components/[feature]` directories
+- Use Shadcn UI components from `/components/ui`
+- Follow component composition pattern
+- Create page components in `/page/[feature]` directories
+- Use dynamic imports with loading skeletons for page components
+- Keep components focused and small
+
+## Database Patterns
+
+- Use repository functions for database operations
+- Apply Row Level Security in the database
+- Perform data validation before database operations
+- Use transactions for multi-table operations
+- Follow naming conventions:
+  - Plural for table names (profiles, notes)
+  - Singular for column names (id, name)
+  - Junction tables named as `table1_table2` (note_collaborators)
+
+## Authentication
+
+- Use Supabase Auth for authentication
+- Implement server-side authentication via middleware
+- Always create proper client and server Supabase clients
+- Use `@supabase/ssr` package for server components
+- Protect routes using auth middleware
+- Verify user ownership before data operations
+
+## Supabase Client Creation
+
+- Always use `createBrowserClient` for client components
+- Always use `createServerClient` for server components and middleware
+- Use `getAll()` and `setAll()` for cookies (never use individual cookie methods)
+- Never import from `@supabase/auth-helpers-nextjs`
+
+## Form Handling
+
+- Use React Hook Form for form management
+- Use Zod for form validation
+- Implement proper error handling and display
+- Disable submit buttons during form submission
+- Use optimistic updates where appropriate
+
+## State Management
+
+- Use React Query for server state
+- Use React Context for global UI state
+- Keep component state local where possible
+- Use reducers for complex state logic
+- Define state interfaces in `/src/types/state.ts`
+
+## Error Handling
+
+- Use try/catch blocks for async operations
+- Implement global error boundaries
+- Display user-friendly error messages
+- Log detailed errors on the server
+- Use consistent error handling patterns
+
+## UI Design
+
+- Follow mobile-first responsive design
+- Implement dark mode support
+- Use Tailwind CSS for styling
+- Follow accessibility best practices
+- Use skeleton components for loading states
+
+## Performance
+
+- Use proper React Query caching
+- Implement pagination for large data sets
+- Use dynamic imports for code splitting
+- Optimize database queries with proper indexes
+- Use server components where appropriate
+
+## File Naming
+
+- Use `.tsx` extension for React components
+- Use `.ts` extension for utility files
+- Use kebab-case for file names
+- Use `index.ts` files for barrel exports
+- Use descriptive file names
